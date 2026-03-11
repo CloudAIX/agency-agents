@@ -111,6 +111,10 @@ detect_gemini_cli()   { command -v gemini >/dev/null 2>&1 || [[ -d "${HOME}/.gem
 detect_cursor()       { command -v cursor >/dev/null 2>&1 || [[ -d "${HOME}/.cursor" ]]; }
 detect_opencode()     { command -v opencode >/dev/null 2>&1 || [[ -d "${HOME}/.config/opencode" ]]; }
 detect_aider()        { command -v aider >/dev/null 2>&1; }
+detect_claude_cowork() {
+  # macOS: ~/Library/Application Support/Claude  |  Linux: ~/.config/claude
+  [[ -d "${HOME}/Library/Application Support/Claude" ]] ||   [[ -d "${HOME}/.config/claude" ]] ||   [[ -n "${CLAUDE_COWORK_PLUGINS_DIR:-}" ]]
+}
 detect_openclaw()     { command -v openclaw >/dev/null 2>&1 || [[ -d "${HOME}/.openclaw" ]]; }
 detect_windsurf()     { command -v windsurf >/dev/null 2>&1 || [[ -d "${HOME}/.codeium" ]]; }
 
@@ -408,6 +412,36 @@ install_windsurf() {
   cp "$src" "$dest"
   ok "Windsurf: installed -> $dest"
   warn "Windsurf: project-scoped. Run from your project root to install there."
+}
+
+install_claude_cowork() {
+  local src="$INTEGRATIONS/claude-cowork"
+  local count=0
+
+  # Resolve destination: env var > macOS app support > Linux config
+  local dest
+  if [[ -n "${CLAUDE_COWORK_PLUGINS_DIR:-}" ]]; then
+    dest="$CLAUDE_COWORK_PLUGINS_DIR"
+  elif [[ -d "${HOME}/Library/Application Support/Claude" ]]; then
+    dest="${HOME}/Library/Application Support/Claude/cowork-plugins"
+  else
+    dest="${HOME}/.config/claude/cowork-plugins"
+  fi
+
+  [[ -d "$src" ]] || { err "integrations/claude-cowork missing. Run ./scripts/convert.sh first."; return 1; }
+
+  mkdir -p "$dest"
+
+  local plugin_dir plugin_name
+  while IFS= read -r -d '' plugin_dir; do
+    plugin_name="$(basename "$plugin_dir")"
+    rm -rf "${dest:?}/$plugin_name"
+    cp -r "$plugin_dir" "$dest/$plugin_name"
+    (( count++ )) || true
+  done < <(find "$src" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+
+  ok "Claude Cowork: $count plugins -> $dest"
+  warn "Claude Cowork: restart Claude to load newly installed plugins."
 }
 
 install_tool() {
