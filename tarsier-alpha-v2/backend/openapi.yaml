@@ -1,0 +1,378 @@
+openapi: 3.0.3
+info:
+  title: TarsierAlpha v2 API
+  description: |
+    Scanner-only, paper-trading simulation API for options setups.
+    All trades are paper (hypothetical) — no real broker execution.
+
+    **Agentic use**: AI agents can use `/api/agent/*` endpoints with an API key.
+  version: 2.0.0
+  contact:
+    url: https://tarsieralpha.com
+
+servers:
+  - url: https://api.tarsieralpha.com
+    description: Production
+  - url: http://localhost:4000
+    description: Local development
+
+tags:
+  - name: Scans
+    description: High-score options setups
+  - name: PnL
+    description: Paper trade P&L tracking
+  - name: Agent
+    description: Agentic API (AI-accessible endpoints)
+  - name: Hedge
+    description: Portfolio hedge mode
+
+paths:
+  /api/scans:
+    get:
+      tags: [Scans]
+      summary: Fetch high-score setups (longs or shorts)
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [long, short, both]
+            default: long
+        - name: minScore
+          in: query
+          schema:
+            type: number
+            minimum: 0
+            maximum: 100
+            default: 62
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+        - name: refresh
+          in: query
+          description: Force live re-scan (ignores cache)
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Array of high-score setups
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  type:
+                    type: string
+                  scans:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Setup'
+
+  /api/pnl:
+    get:
+      tags: [PnL]
+      summary: User P&L split by longs vs shorts
+      security:
+        - FirebaseAuth: []
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [week, month, all]
+            default: week
+      responses:
+        '200':
+          description: P&L summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PnLResponse'
+
+  /api/pnl/public:
+    get:
+      tags: [PnL]
+      summary: Anonymized weekly community P&L (no auth required)
+      responses:
+        '200':
+          description: Public leaderboard P&L
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  summary:
+                    type: string
+                    example: "Longs: +18% | Shorts: -5% | Net: +13%"
+                  longs:
+                    $ref: '#/components/schemas/PnLStats'
+                  shorts:
+                    $ref: '#/components/schemas/PnLStats'
+
+  /api/agent/scans:
+    get:
+      tags: [Agent]
+      summary: Fetch high-score setups for AI agents
+      security:
+        - AgentKey: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [longs, shorts, both]
+        - name: minScore
+          in: query
+          schema:
+            type: number
+            minimum: 0
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            maximum: 25
+      responses:
+        '200':
+          description: Array of setups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Setup'
+
+  /api/agent/pnl:
+    get:
+      tags: [Agent]
+      summary: Get P&L for a user (agent use)
+      security:
+        - AgentKey: []
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [week, month, all]
+      responses:
+        '200':
+          description: P&L summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PnLResponse'
+
+  /api/agent/paper-trade:
+    post:
+      tags: [Agent]
+      summary: Simulate a paper trade fill
+      security:
+        - AgentKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ticker, strike, side]
+              properties:
+                ticker:
+                  type: string
+                  example: AAPL
+                strike:
+                  type: number
+                  example: 185
+                side:
+                  type: string
+                  enum: [long, short]
+                qty:
+                  type: integer
+                  default: 1
+                expiry:
+                  type: string
+                  format: date
+                  example: "2024-03-15"
+      responses:
+        '200':
+          description: Simulated fill
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tradeId:
+                    type: string
+                  ticker:
+                    type: string
+                  strike:
+                    type: number
+                  optionType:
+                    type: string
+                  entryPrice:
+                    type: number
+                  timestamp:
+                    type: string
+                    format: date-time
+                  note:
+                    type: string
+
+  /api/hedge/suggest:
+    post:
+      tags: [Hedge]
+      summary: Generate a paper hedge basket for business exposure
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [industry, exposureUsd]
+              properties:
+                industry:
+                  type: string
+                  enum: [trucking, retail, oil, tech, airlines, housing, banking, healthcare]
+                exposureUsd:
+                  type: number
+                  example: 1000000
+                riskTolerance:
+                  type: string
+                  enum: [low, med, high]
+                  default: med
+      responses:
+        '200':
+          description: Hedge basket suggestion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HedgeResult'
+
+components:
+  securitySchemes:
+    FirebaseAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Firebase ID Token
+    AgentKey:
+      type: apiKey
+      in: header
+      name: X-Agent-Key
+
+  schemas:
+    Setup:
+      type: object
+      properties:
+        ticker:
+          type: string
+        side:
+          type: string
+          enum: [long, short]
+        setupType:
+          type: string
+        score:
+          type: number
+        price:
+          type: number
+        rsi:
+          type: number
+        chain:
+          $ref: '#/components/schemas/OptionChain'
+        paperEntryPrice:
+          type: number
+        entryZone:
+          type: string
+        badges:
+          type: array
+          items:
+            type: string
+        riskNote:
+          type: string
+
+    OptionChain:
+      type: object
+      properties:
+        strike:
+          type: number
+        expiry:
+          type: string
+        optionType:
+          type: string
+          enum: [call, put]
+        bid:
+          type: number
+        ask:
+          type: number
+        mid:
+          type: number
+        iv:
+          type: number
+        oi:
+          type: integer
+        delta:
+          type: number
+        gamma:
+          type: number
+        theta:
+          type: number
+        vega:
+          type: number
+
+    PnLStats:
+      type: object
+      properties:
+        count:
+          type: integer
+        winRate:
+          type: number
+        totalPnl:
+          type: number
+        netPct:
+          type: number
+        avgHoldHrs:
+          type: number
+        maxDrawdown:
+          type: number
+
+    PnLResponse:
+      type: object
+      properties:
+        period:
+          type: string
+        longs:
+          $ref: '#/components/schemas/PnLStats'
+        shorts:
+          $ref: '#/components/schemas/PnLStats'
+        net:
+          $ref: '#/components/schemas/PnLStats'
+
+    HedgeResult:
+      type: object
+      properties:
+        industry:
+          type: string
+        exposureUsd:
+          type: number
+        hedgeTargetUsd:
+          type: number
+        totalCost:
+          type: number
+        totalExpectedGainAt5pctDrop:
+          type: number
+        coverageRatio:
+          type: number
+        basket:
+          type: array
+          items:
+            type: object
+        note:
+          type: string

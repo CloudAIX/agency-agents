@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-brand-dark text-gray-100 font-sans antialiased;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-brand-panel; }
+  ::-webkit-scrollbar-thumb { @apply bg-brand-border rounded-full; }
+}
+
+@layer components {
+  /* Score badge */
+  .score-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-semibold;
+  }
+  .score-high   { @apply score-badge bg-green-900/60 text-green-400; }
+  .score-medium { @apply score-badge bg-yellow-900/60 text-yellow-400; }
+
+  /* Side pills */
+  .pill-long  { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-900/40 text-green-400 border border-green-800; }
+  .pill-short { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-900/40 text-red-400 border border-red-800; }
+  .pill-hedge { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-900/40 text-amber-400 border border-amber-800; }
+
+  /* Card */
+  .scan-card {
+    @apply bg-brand-panel border border-brand-border rounded-xl p-4 hover:border-indigo-500/50 transition-colors;
+  }
+
+  /* Btn primary */
+  .btn-primary {
+    @apply px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Warning badge */
+  .badge-warning {
+    @apply inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs bg-yellow-900/50 text-yellow-300 border border-yellow-700/50;
+  }
+}
