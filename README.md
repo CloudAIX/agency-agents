@@ -111,7 +111,7 @@ jobs:
       # Single agent
       - name: Load Security Engineer agent
         id: agent
-        uses: el-j/agency-agents@main
+        uses: msitarzewski/agency-agents@main
         with:
           agent: security-engineer
 
@@ -123,7 +123,7 @@ jobs:
       # Swarm mode
       - name: Build a startup swarm
         id: swarm
-        uses: el-j/agency-agents@main
+        uses: msitarzewski/agency-agents@main
         with:
           agents: 'frontend-developer,backend-architect,growth-hacker'
           swarm_name: 'Startup MVP Team'
@@ -766,6 +766,6 @@ Special recognition to the 50+ Redditors who requested this within the first 12 
 
 [⭐ Star this repo](https://github.com/msitarzewski/agency-agents) • [🍴 Fork it](https://github.com/msitarzewski/agency-agents/fork) • [🐛 Report an issue](https://github.com/msitarzewski/agency-agents/issues) • [❤️ Sponsor](https://github.com/sponsors/msitarzewski)
 
-Made with ❤️ by the community, for the community
+Made with ❤️ by [msitarzewski](https://github.com/msitarzewski) and [contributors](https://github.com/msitarzewski/agency-agents/graphs/contributors) including [el-j](https://github.com/el-j)
 
 </div>
