@@ -75,3 +75,5 @@ integrations/aider/CONVENTIONS.md
 integrations/windsurf/.windsurfrules
 integrations/openclaw/*
 !integrations/openclaw/README.md
+mcp-server/node_modules/
+mcp-server/build/
