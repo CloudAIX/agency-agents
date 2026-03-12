@@ -27,10 +27,13 @@ Born from a Reddit thread and months of iteration, **The Agency** is a growing c
 ### Option 1: Use with Claude Code (Recommended)
 
 ```bash
-# Copy agents to your Claude Code directory
-cp -r agency-agents/* ~/.claude/agents/
+# Install all agents to your Claude Code directory
+./scripts/install.sh --tool claude-code
 
-# Now activate any agent in your Claude Code sessions:
+# Or manually copy a category if you only want one division
+cp engineering/*.md ~/.claude/agents/
+
+# Then activate any agent in your Claude Code sessions:
 # "Hey Claude, activate Frontend Developer mode and help me build a React component"
 ```
 
@@ -44,7 +47,7 @@ Each agent file contains:
 
 Browse the agents below and copy/adapt the ones you need!
 
-### Option 3: Use with Other Tools (Cursor, Aider, Windsurf, Gemini CLI, OpenCode)
+### Option 3: Use with Other Tools (GitHub Copilot, Antigravity, Gemini CLI, OpenCode, OpenClaw, Cursor, Aider, Windsurf)
 
 ```bash
 # Step 1 -- generate integration files for all supported tools
@@ -54,8 +57,12 @@ Browse the agents below and copy/adapt the ones you need!
 ./scripts/install.sh
 
 # Or target a specific tool directly
-./scripts/install.sh --tool cursor
+./scripts/install.sh --tool antigravity
+./scripts/install.sh --tool gemini-cli
+./scripts/install.sh --tool opencode
 ./scripts/install.sh --tool copilot
+./scripts/install.sh --tool openclaw
+./scripts/install.sh --tool cursor
 ./scripts/install.sh --tool aider
 ./scripts/install.sh --tool windsurf
 ```
@@ -418,14 +425,14 @@ The Agency works natively with Claude Code, and ships conversion + install scrip
 ### Supported Tools
 
 - **[Claude Code](https://claude.ai/code)** — native `.md` agents, no conversion needed → `~/.claude/agents/`
-- **[Github Copilot](https://github.com/copilot)** — native `.md` agents, no conversion needed → `~/.github/agents/`
+- **[GitHub Copilot](https://github.com/copilot)** — native `.md` agents, no conversion needed → `~/.github/agents/`
 - **[Antigravity](https://github.com/google-gemini/antigravity)** — `SKILL.md` per agent → `~/.gemini/antigravity/skills/`
 - **[Gemini CLI](https://github.com/google-gemini/gemini-cli)** — extension + `SKILL.md` files → `~/.gemini/extensions/agency-agents/`
 - **[OpenCode](https://opencode.ai)** — `.md` agent files → `.opencode/agents/`
 - **[Cursor](https://cursor.sh)** — `.mdc` rule files → `.cursor/rules/`
 - **[Aider](https://aider.chat)** — single `CONVENTIONS.md` → `./CONVENTIONS.md`
 - **[Windsurf](https://codeium.com/windsurf)** — single `.windsurfrules` → `./.windsurfrules`
-- **[OpenClaw](https://openclaw.com)** — `SOUL.md` + `AGENTS.md` + `IDENTITY.md` per agent
+- **[OpenClaw](https://openclaw.com)** — per-agent workspaces (`SOUL.md` + `AGENTS.md` + `IDENTITY.md`) → `~/.openclaw/agency-agents/`
 
 ---
 
@@ -455,19 +462,26 @@ The installer scans your system for installed tools, shows a checkbox UI, and le
   [x]  3)  [*]  Antigravity     (~/.gemini/antigravity)
   [ ]  4)  [ ]  Gemini CLI      (gemini extension)
   [ ]  5)  [ ]  OpenCode        (opencode.ai)
-  [x]  6)  [*]  Cursor          (.cursor/rules)
-  [ ]  7)  [ ]  Aider           (CONVENTIONS.md)
-  [ ]  8)  [ ]  Windsurf        (.windsurfrules)
+  [ ]  6)  [ ]  OpenClaw        (~/.openclaw/agency-agents)
+  [x]  7)  [*]  Cursor          (.cursor/rules)
+  [ ]  8)  [ ]  Aider           (CONVENTIONS.md)
+  [ ]  9)  [ ]  Windsurf        (.windsurfrules)
 
-  [1-8] toggle   [a] all   [n] none   [d] detected
+  [1-9] toggle   [a] all   [n] none   [d] detected
   [Enter] install   [q] quit
 ```
 
 **Or install a specific tool directly:**
 ```bash
+./scripts/install.sh --tool claude-code
+./scripts/install.sh --tool copilot
+./scripts/install.sh --tool antigravity
+./scripts/install.sh --tool gemini-cli
 ./scripts/install.sh --tool cursor
 ./scripts/install.sh --tool opencode
-./scripts/install.sh --tool antigravity
+./scripts/install.sh --tool openclaw
+./scripts/install.sh --tool aider
+./scripts/install.sh --tool windsurf
 ```
 
 **Non-interactive (CI/scripts):**
@@ -497,7 +511,7 @@ See [integrations/claude-code/README.md](integrations/claude-code/README.md) for
 </details>
 
 <details>
-<summary><strong>Github Copilot</strong></summary>
+<summary><strong>GitHub Copilot</strong></summary>
 
 Agents are copied directly from the repo into `~/.github/agents/` -- no conversion needed.
 
@@ -505,7 +519,7 @@ Agents are copied directly from the repo into `~/.github/agents/` -- no conversi
 ./scripts/install.sh --tool copilot
 ```
 
-Then activate in Github Copilot:
+Then activate in GitHub Copilot:
 ```
 Use the Frontend Developer agent to review this component.
 ```
@@ -533,7 +547,7 @@ See [integrations/antigravity/README.md](integrations/antigravity/README.md) for
 <details>
 <summary><strong>Gemini CLI</strong></summary>
 
-Installs as a Gemini CLI extension with 80 skills + a manifest.
+Installs as a Gemini CLI extension with generated skills plus a manifest.
 
 ```bash
 ./scripts/install.sh --tool gemini-cli
@@ -564,6 +578,24 @@ Activate in OpenCode:
 ```
 
 See [integrations/opencode/README.md](integrations/opencode/README.md) for details.
+</details>
+
+<details>
+<summary><strong>OpenClaw</strong></summary>
+
+OpenClaw uses generated workspaces containing `SOUL.md`, `AGENTS.md`, and
+`IDENTITY.md` for each agent.
+
+```bash
+./scripts/convert.sh --tool openclaw
+./scripts/install.sh --tool openclaw
+```
+
+If the `openclaw` CLI is available, the installer registers each workspace
+automatically. Run `openclaw gateway restart` after installation so the new
+agents are activated.
+
+See [integrations/openclaw/README.md](integrations/openclaw/README.md) for details.
 </details>
 
 <details>
