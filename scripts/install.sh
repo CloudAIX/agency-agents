@@ -24,7 +24,6 @@
 #
 # Flags:
 #   --tool <name>     Install only the specified tool
-#   --link            Use symbolic links instead of copying (for development)
 #   --interactive     Show interactive selector (default when run in a terminal)
 #   --no-interactive  Skip interactive selector, install all detected tools
 #   --help            Show this help
@@ -54,16 +53,6 @@ warn()   { printf "${C_YELLOW}[!!]${C_RESET}  %s\n" "$*"; }
 err()    { printf "${C_RED}[ERR]${C_RESET} %s\n" "$*" >&2; }
 header() { printf "\n${C_BOLD}%s${C_RESET}\n" "$*"; }
 dim()    { printf "${C_DIM}%s${C_RESET}\n" "$*"; }
-
-install_file() {
-  local src="$1"
-  local dest="$2"
-  if [[ "$USE_LINK" == "true" ]]; then
-    ln -sf "$src" "$dest"
-  else
-    cp "$src" "$dest"
-  fi
-}
 
 # ---------------------------------------------------------------------------
 # Box drawing -- pure ASCII, fixed 52-char wide
@@ -97,7 +86,6 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 INTEGRATIONS="$REPO_ROOT/integrations"
 
 ALL_TOOLS=(claude-code copilot antigravity gemini-cli opencode openclaw cursor aider windsurf qwen)
-USE_LINK=false
 
 # ---------------------------------------------------------------------------
 # Usage
@@ -292,7 +280,7 @@ install_claude_code() {
     while IFS= read -r -d '' f; do
       first_line="$(head -1 "$f")"
       [[ "$first_line" == "---" ]] || continue
-      install_file "$f" "$dest/"
+      cp "$f" "$dest/"
       (( count++ )) || true
     done < <(find "$REPO_ROOT/$dir" -name "*.md" -type f -print0)
   done
@@ -310,7 +298,7 @@ install_copilot() {
     while IFS= read -r -d '' f; do
       first_line="$(head -1 "$f")"
       [[ "$first_line" == "---" ]] || continue
-      install_file "$f" "$dest/"
+      cp "$f" "$dest/"
       (( count++ )) || true
     done < <(find "$REPO_ROOT/$dir" -name "*.md" -type f -print0)
   done
@@ -327,7 +315,7 @@ install_antigravity() {
   while IFS= read -r -d '' d; do
     local name; name="$(basename "$d")"
     mkdir -p "$dest/$name"
-    install_file "$d/SKILL.md" "$dest/$name/SKILL.md"
+    cp "$d/SKILL.md" "$dest/$name/SKILL.md"
     (( count++ )) || true
   done < <(find "$src" -mindepth 1 -maxdepth 1 -type d -print0)
   ok "Antigravity: $count skills -> $dest"
@@ -343,12 +331,12 @@ install_gemini_cli() {
   [[ -f "$manifest" ]] || { err "integrations/gemini-cli/gemini-extension.json missing. Run ./scripts/convert.sh --tool gemini-cli first."; return 1; }
   [[ -d "$skills_dir" ]] || { err "integrations/gemini-cli/skills missing. Run ./scripts/convert.sh --tool gemini-cli first."; return 1; }
   mkdir -p "$dest/skills"
-  install_file "$manifest" "$dest/gemini-extension.json"
+  cp "$manifest" "$dest/gemini-extension.json"
   local d
   while IFS= read -r -d '' d; do
     local name; name="$(basename "$d")"
     mkdir -p "$dest/skills/$name"
-    install_file "$d/SKILL.md" "$dest/skills/$name/SKILL.md"
+    cp "$d/SKILL.md" "$dest/skills/$name/SKILL.md"
     (( count++ )) || true
   done < <(find "$skills_dir" -mindepth 1 -maxdepth 1 -type d -print0)
   ok "Gemini CLI: $count skills -> $dest"
@@ -362,7 +350,7 @@ install_opencode() {
   mkdir -p "$dest"
   local f
   while IFS= read -r -d '' f; do
-    install_file "$f" "$dest/"; (( count++ )) || true
+    cp "$f" "$dest/"; (( count++ )) || true
   done < <(find "$src" -maxdepth 1 -name "*.md" -print0)
   ok "OpenCode: $count agents -> $dest"
   warn "OpenCode: project-scoped. Run from your project root to install there."
@@ -378,9 +366,9 @@ install_openclaw() {
   while IFS= read -r -d '' d; do
     local name; name="$(basename "$d")"
     mkdir -p "$dest/$name"
-    install_file "$d/SOUL.md" "$dest/$name/SOUL.md"
-    install_file "$d/AGENTS.md" "$dest/$name/AGENTS.md"
-    install_file "$d/IDENTITY.md" "$dest/$name/IDENTITY.md"
+    cp "$d/SOUL.md" "$dest/$name/SOUL.md"
+    cp "$d/AGENTS.md" "$dest/$name/AGENTS.md"
+    cp "$d/IDENTITY.md" "$dest/$name/IDENTITY.md"
     # Register with OpenClaw so agents are usable by agentId immediately
     if command -v openclaw >/dev/null 2>&1; then
       openclaw agents add "$name" --workspace "$dest/$name" --non-interactive || true
@@ -401,7 +389,7 @@ install_cursor() {
   mkdir -p "$dest"
   local f
   while IFS= read -r -d '' f; do
-    install_file "$f" "$dest/"; (( count++ )) || true
+    cp "$f" "$dest/"; (( count++ )) || true
   done < <(find "$src" -maxdepth 1 -name "*.mdc" -print0)
   ok "Cursor: $count rules -> $dest"
   warn "Cursor: project-scoped. Run from your project root to install there."
@@ -415,7 +403,7 @@ install_aider() {
     warn "Aider: CONVENTIONS.md already exists at $dest (remove to reinstall)."
     return 0
   fi
-  install_file "$src" "$dest"
+  cp "$src" "$dest"
   ok "Aider: installed -> $dest"
   warn "Aider: project-scoped. Run from your project root to install there."
 }
@@ -428,7 +416,7 @@ install_windsurf() {
     warn "Windsurf: .windsurfrules already exists at $dest (remove to reinstall)."
     return 0
   fi
-  install_file "$src" "$dest"
+  cp "$src" "$dest"
   ok "Windsurf: installed -> $dest"
   warn "Windsurf: project-scoped. Run from your project root to install there."
 }
@@ -444,7 +432,7 @@ install_qwen() {
 
   local f
   while IFS= read -r -d '' f; do
-    install_file "$f" "$dest/"
+    cp "$f" "$dest/"
     (( count++ )) || true
   done < <(find "$src" -maxdepth 1 -name "*.md" -print0)
 
@@ -474,12 +462,10 @@ install_tool() {
 main() {
   local tool="all"
   local interactive_mode="auto"
-  use_link=false
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --tool)            tool="${2:?'--tool requires a value'}"; shift 2; interactive_mode="no" ;;
-      --link)            use_link=true; USE_LINK=true; shift ;;
       --interactive)     interactive_mode="yes"; shift ;;
       --no-interactive)  interactive_mode="no"; shift ;;
       --help|-h)         usage ;;
@@ -542,9 +528,6 @@ main() {
   header "The Agency -- Installing agents"
   printf "  Repo:       %s\n" "$REPO_ROOT"
   printf "  Installing: %s\n" "${SELECTED_TOOLS[*]}"
-  if [[ "$USE_LINK" == "true" ]]; then
-    printf "  Mode:       ${C_CYAN}symbolic links${C_RESET} (use --link flag)\n"
-  fi
   printf "\n"
 
   local installed=0 t
