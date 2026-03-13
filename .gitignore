@@ -71,6 +71,7 @@ integrations/gemini-cli/skills/
 integrations/gemini-cli/gemini-extension.json
 integrations/opencode/agents/
 integrations/cursor/rules/
+integrations/codex/AGENTS.md
 integrations/aider/CONVENTIONS.md
 integrations/windsurf/.windsurfrules
 integrations/openclaw/*
