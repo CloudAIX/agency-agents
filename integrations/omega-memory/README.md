@@ -1,24 +1,38 @@
-# OMEGA Memory Integration
+# OMEGA — Persistent MCP Memory Server for AI Coding Agents
 
-> Give any agent persistent, semantically searchable memory across sessions using [OMEGA](https://github.com/omega-memory/omega-memory), an MCP memory server.
+> Long-term memory for Claude Code, Cursor, Windsurf, and any MCP-compatible AI coding assistant. Local-first, offline, no API keys required.
 
 ## What It Does
 
-OMEGA is an MCP memory server that provides structured, persistent memory for AI coding agents. Unlike simple key-value memory stores, OMEGA offers:
+[OMEGA](https://github.com/omega-memory/omega-memory) is an open-source MCP memory server that gives AI coding agents persistent, semantically searchable memory across sessions. It runs locally on SQLite — your data never leaves your machine.
 
-- **Semantic search**: Query memories by meaning, not just keywords. OMEGA uses local embeddings (ONNX, no API calls) to find relevant context even when the wording differs.
-- **Typed memories**: Store decisions, lessons learned, error patterns, user preferences, constraints, and session summaries as distinct types with different retention behaviors.
-- **Memory decay and consolidation**: Old, low-value memories fade over time. Important memories are reinforced through access. This keeps the memory store relevant without manual pruning.
-- **Contradiction detection**: When you store a memory that conflicts with an existing one, OMEGA flags the contradiction so agents don't act on stale information.
-- **Cross-session continuity**: Agents pick up exactly where they left off. Checkpoint a task mid-session, resume it in the next one.
-- **Multi-agent coordination**: Memories are scoped by agent type, entity, and project. Multiple agents can share a memory store without stepping on each other.
+Unlike simple key-value memory stores or conversation history workarounds, OMEGA provides:
+
+- **Semantic search**: Query memories by meaning, not just keywords. Local ONNX embeddings find relevant context even when the wording differs — no API calls, no cloud dependency.
+- **Typed memories**: Store decisions, lessons learned, error patterns, user preferences, and session summaries as distinct types with different retention behaviors.
+- **Memory decay and consolidation**: Low-value memories fade over time. Important memories are reinforced through access. The memory store stays relevant without manual pruning.
+- **Contradiction detection**: When a new memory conflicts with an existing one, OMEGA flags the contradiction so agents don't act on stale information.
+- **Cross-session continuity**: Agents pick up exactly where they left off. Checkpoint a task mid-session, resume it days later.
+- **Multi-agent coordination**: Memories are scoped by agent type, entity, and project. Multiple agents share a memory store without stepping on each other.
+
+### Why OMEGA over other memory solutions?
+
+| | OMEGA | Generic MCP memory | No memory (default) |
+|---|---|---|---|
+| Semantic search | Local embeddings (ONNX) | Keyword only | N/A |
+| Memory types | 6 types with different behaviors | Untyped blobs | N/A |
+| Decay/consolidation | Automatic | Manual cleanup | N/A |
+| Contradiction detection | Built-in | No | N/A |
+| Cross-session resume | Checkpoint/resume API | Manual | Lost on session end |
+| Privacy | 100% local, SQLite, offline | Varies | N/A |
+| API keys required | None | Varies | N/A |
 
 ## Setup
 
 ### Requirements
 
 - Python 3.11+
-- An MCP-compatible client (Claude Code, Cursor, etc.)
+- Any MCP-compatible client: Claude Code, Cursor, Windsurf, Zed, or any tool supporting the Model Context Protocol
 
 ### Install
 
@@ -66,7 +80,7 @@ OMEGA exposes these MCP tools:
 | `omega_remind` | Set and retrieve reminders |
 | `omega_maintain` | Run maintenance operations (decay, consolidation, cleanup) |
 | `omega_stats` | Memory store statistics and health metrics |
-| `omega_reflect` | Analyze patterns across stored memories |
+| `omega_lessons` | Cross-session lessons ranked by access frequency |
 
 ## How to Add OMEGA Memory to Any Agent
 
@@ -104,8 +118,19 @@ Session 2 (Frontend Developer):
   -> Builds the frontend against the documented API contract
 ```
 
+## Supported MCP Clients
+
+OMEGA works with any client that supports the Model Context Protocol:
+
+- **Claude Code** (Anthropic CLI)
+- **Cursor**
+- **Windsurf**
+- **Zed**
+- **Any MCP-compatible editor or agent framework**
+
 ## Links
 
 - **GitHub**: [omega-memory/omega-memory](https://github.com/omega-memory/omega-memory)
 - **PyPI**: [omega-memory](https://pypi.org/project/omega-memory/)
-- **Documentation**: See the GitHub README for full documentation
+- **Skills**: [omega-memory/omega-skills](https://github.com/omega-memory/omega-skills) — battle-tested Claude Code skills enhanced by OMEGA memory
+- **Documentation**: See the GitHub README for full setup and usage guide
