@@ -306,6 +306,8 @@ install_copilot() {
   done
   ok "Copilot: $count agents -> $dest_github"
   ok "Copilot: $count agents -> $dest_copilot"
+  warn "Copilot: Verify VS Code setting chat.agentFilesLocations includes ~/.github/agents or ~/.copilot/agents"
+  warn "See https://code.visualstudio.com/docs/copilot/customization/custom-agents#_custom-agent-file-locations"
 }
 
 install_antigravity() {
