@@ -16,6 +16,7 @@
 #   gemini-cli   -- Install extension to ~/.gemini/extensions/agency-agents/
 #   opencode     -- Copy agents to .opencode/agent/ in current directory
 #   cursor       -- Copy rules to .cursor/rules/ in current directory
+#   codex        -- Copy AGENTS.md to current directory
 #   aider        -- Copy CONVENTIONS.md to current directory
 #   windsurf     -- Copy .windsurfrules to current directory
 #   openclaw     -- Copy workspaces to ~/.openclaw/agency-agents/
@@ -85,7 +86,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 INTEGRATIONS="$REPO_ROOT/integrations"
 
-ALL_TOOLS=(claude-code copilot antigravity gemini-cli opencode openclaw cursor aider windsurf qwen)
+ALL_TOOLS=(claude-code copilot antigravity gemini-cli opencode openclaw cursor codex aider windsurf qwen)
 
 # ---------------------------------------------------------------------------
 # Usage
@@ -114,6 +115,7 @@ detect_antigravity()  { [[ -d "${HOME}/.gemini/antigravity/skills" ]]; }
 detect_gemini_cli()   { command -v gemini >/dev/null 2>&1 || [[ -d "${HOME}/.gemini" ]]; }
 detect_cursor()       { command -v cursor >/dev/null 2>&1 || [[ -d "${HOME}/.cursor" ]]; }
 detect_opencode()     { command -v opencode >/dev/null 2>&1 || [[ -d "${HOME}/.config/opencode" ]]; }
+detect_codex()        { command -v codex >/dev/null 2>&1; }
 detect_aider()        { command -v aider >/dev/null 2>&1; }
 detect_openclaw()     { command -v openclaw >/dev/null 2>&1 || [[ -d "${HOME}/.openclaw" ]]; }
 detect_windsurf()     { command -v windsurf >/dev/null 2>&1 || [[ -d "${HOME}/.codeium" ]]; }
@@ -128,6 +130,7 @@ is_detected() {
     opencode)    detect_opencode    ;;
     openclaw)    detect_openclaw    ;;
     cursor)      detect_cursor      ;;
+    codex)       detect_codex       ;;
     aider)       detect_aider       ;;
     windsurf)    detect_windsurf    ;;
     qwen)        detect_qwen        ;;
@@ -145,6 +148,7 @@ tool_label() {
     opencode)    printf "%-14s  %s" "OpenCode"     "(opencode.ai)"           ;;
     openclaw)    printf "%-14s  %s" "OpenClaw"     "(~/.openclaw)"           ;;
     cursor)      printf "%-14s  %s" "Cursor"       "(.cursor/rules)"         ;;
+    codex)       printf "%-14s  %s" "Codex"        "(AGENTS.md)"             ;;
     aider)       printf "%-14s  %s" "Aider"        "(CONVENTIONS.md)"        ;;
     windsurf)    printf "%-14s  %s" "Windsurf"     "(.windsurfrules)"        ;;
     qwen)        printf "%-14s  %s" "Qwen Code"    "(~/.qwen/agents)"        ;;
@@ -398,6 +402,19 @@ install_cursor() {
   warn "Cursor: project-scoped. Run from your project root to install there."
 }
 
+install_codex() {
+  local src="$INTEGRATIONS/codex/AGENTS.md"
+  local dest="${PWD}/AGENTS.md"
+  [[ -f "$src" ]] || { err "integrations/codex/AGENTS.md missing. Run convert.sh first."; return 1; }
+  if [[ -f "$dest" ]]; then
+    warn "Codex: AGENTS.md already exists at $dest (remove to reinstall)."
+    return 0
+  fi
+  cp "$src" "$dest"
+  ok "Codex: installed -> $dest"
+  warn "Codex: project-scoped. Run from your project root to install there."
+}
+
 install_aider() {
   local src="$INTEGRATIONS/aider/CONVENTIONS.md"
   local dest="${PWD}/CONVENTIONS.md"
@@ -453,6 +470,7 @@ install_tool() {
     opencode)    install_opencode    ;;
     openclaw)    install_openclaw    ;;
     cursor)      install_cursor      ;;
+    codex)       install_codex       ;;
     aider)       install_aider       ;;
     windsurf)    install_windsurf    ;;
     qwen)        install_qwen        ;;
