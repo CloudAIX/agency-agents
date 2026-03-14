@@ -32,6 +32,19 @@ supported agentic coding tools.
 ./scripts/install.sh --tool gemini-cli
 ```
 
+Windows (PowerShell / CMD, no WSL required):
+
+```powershell
+# Generate integrations if missing/stale
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\convert.ps1
+
+# Interactive install
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Interactive
+
+# Tool-specific install
+scripts\install.cmd -Tool opencode -NoInteractive
+```
+
 For project-scoped tools such as OpenCode, Cursor, Aider, and Windsurf, run
 the installer from your target project root as shown in the tool-specific
 sections below.

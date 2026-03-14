@@ -13,6 +13,18 @@ cd /your/project
 /path/to/agency-agents/scripts/install.sh --tool opencode
 ```
 
+Windows (PowerShell / CMD, no WSL required):
+
+```powershell
+# Run from your project root
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\path\to\agency-agents\scripts\convert.ps1" -Tool opencode
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\path\to\agency-agents\scripts\install.ps1" -Tool opencode -NoInteractive
+
+# Or wrappers
+D:\path\to\agency-agents\scripts\convert.cmd -Tool opencode
+D:\path\to\agency-agents\scripts\install.cmd -Tool opencode -NoInteractive
+```
+
 This creates `.opencode/agents/<slug>.md` files in your project directory.
 
 ## Activate an Agent
@@ -53,6 +65,14 @@ globally across all projects, copy them to your OpenCode config directory:
 ```bash
 mkdir -p ~/.config/opencode/agents
 cp integrations/opencode/agents/*.md ~/.config/opencode/agents/
+```
+
+Windows equivalent:
+
+```powershell
+scripts\convert.cmd -Tool opencode
+New-Item -ItemType Directory -Force "$HOME\.config\opencode\agents" | Out-Null
+Copy-Item "integrations\opencode\agents\*.md" "$HOME\.config\opencode\agents\" -Force
 ```
 
 ## Regenerate

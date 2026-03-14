@@ -48,6 +48,7 @@ Browse the agents below and copy/adapt the ones you need!
 
 ```bash
 # Step 1 -- generate integration files for all supported tools
+# (only needed if you modified/added agent files)
 ./scripts/convert.sh
 
 # Step 2 -- install interactively (auto-detects what you have installed)
@@ -58,6 +59,20 @@ Browse the agents below and copy/adapt the ones you need!
 ./scripts/install.sh --tool copilot
 ./scripts/install.sh --tool aider
 ./scripts/install.sh --tool windsurf
+```
+
+Windows (PowerShell / CMD, no WSL required):
+
+```powershell
+# If integrations are missing/stale, generate them first
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\convert.ps1 -Tool opencode
+
+# Install with PowerShell (execution policy safe for one command)
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Tool opencode -NoInteractive
+
+# Or use the CMD launcher wrapper
+scripts\convert.cmd -Tool opencode
+scripts\install.cmd -Tool opencode -NoInteractive
 ```
 
 See the [Multi-Tool Integrations](#-multi-tool-integrations) section below for full details.
@@ -506,9 +521,25 @@ The Agency works natively with Claude Code, and ships conversion + install scrip
 ./scripts/convert.sh
 ```
 
+Windows equivalent:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\convert.ps1
+# or
+scripts\convert.cmd
+```
+
 **Step 2 -- Install (interactive, auto-detects your tools):**
 ```bash
 ./scripts/install.sh
+```
+
+**Windows (PowerShell / CMD):**
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Interactive
+# or
+scripts\install.cmd -Interactive
 ```
 
 The installer scans your system for installed tools, shows a checkbox UI, and lets you pick exactly what to install:
@@ -543,9 +574,51 @@ The installer scans your system for installed tools, shows a checkbox UI, and le
 ./scripts/install.sh --tool antigravity
 ```
 
+Windows equivalent:
+
+```powershell
+scripts\install.cmd -Tool cursor -NoInteractive
+scripts\install.cmd -Tool opencode -NoInteractive
+scripts\install.cmd -Tool openclaw -NoInteractive
+scripts\install.cmd -Tool antigravity -NoInteractive
+```
+
 **Non-interactive (CI/scripts):**
 ```bash
 ./scripts/install.sh --no-interactive --tool all
+```
+
+**Scope + conversion matrix (all tools):**
+
+- **Claude Code**: user-global (`~/.claude/agents`) via installer; **no conversion**
+- **GitHub Copilot**: user-global (`~/.github/agents`) via installer; **no conversion**
+- **Antigravity**: user-global (`~/.gemini/antigravity/skills`) via installer; **conversion required**
+- **Gemini CLI**: user-global (`~/.gemini/extensions/agency-agents`) via installer; **conversion required**
+- **OpenClaw**: user-global (`~/.openclaw/agency-agents`) via installer; **conversion required**
+- **OpenCode**: installer is project-scoped (`.opencode/agents`); global is manual copy to `~/.config/opencode/agents`; **conversion required**
+- **Cursor**: project-scoped (`.cursor/rules`) via installer; **conversion required**
+- **Aider**: project-scoped (`./CONVENTIONS.md`) via installer; **conversion required**
+- **Windsurf**: project-scoped (`./.windsurfrules`) via installer; **conversion required**
+- **Qwen Code**: installer is project-scoped (`.qwen/agents`); optional user-global is manual copy to `~/.qwen/agents`; **conversion required**
+
+**Global install example (Claude Code + OpenCode):**
+
+```bash
+# from repo root
+./scripts/install.sh --tool claude-code
+./scripts/convert.sh --tool opencode
+mkdir -p ~/.config/opencode/agents
+cp integrations/opencode/agents/*.md ~/.config/opencode/agents/
+```
+
+Windows equivalent:
+
+```powershell
+# from repo root
+scripts\install.cmd -Tool claude-code -NoInteractive
+scripts\convert.cmd -Tool opencode
+New-Item -ItemType Directory -Force "$HOME\.config\opencode\agents" | Out-Null
+Copy-Item "integrations\opencode\agents\*.md" "$HOME\.config\opencode\agents\" -Force
 ```
 
 ---
@@ -559,6 +632,12 @@ Agents are copied directly from the repo into `~/.claude/agents/` -- no conversi
 
 ```bash
 ./scripts/install.sh --tool claude-code
+```
+
+Windows equivalent:
+
+```powershell
+scripts\install.cmd -Tool claude-code -NoInteractive
 ```
 
 Then activate in Claude Code:
@@ -631,6 +710,13 @@ Or install globally:
 ```bash
 mkdir -p ~/.config/opencode/agents
 cp integrations/opencode/agents/*.md ~/.config/opencode/agents/
+```
+
+Windows equivalent:
+```powershell
+scripts\convert.cmd -Tool opencode
+New-Item -ItemType Directory -Force "$HOME\.config\opencode\agents" | Out-Null
+Copy-Item "integrations\opencode\agents\*.md" "$HOME\.config\opencode\agents\" -Force
 ```
 
 Activate in OpenCode:
@@ -740,6 +826,13 @@ When you add new agents or edit existing ones, regenerate all integration files:
 ```bash
 ./scripts/convert.sh        # regenerate all
 ./scripts/convert.sh --tool cursor   # regenerate just one tool
+```
+
+Windows equivalent:
+
+```powershell
+scripts\convert.cmd -Tool all
+scripts\convert.cmd -Tool cursor
 ```
 
 ---
