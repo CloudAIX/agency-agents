@@ -9,25 +9,27 @@ title: Agency Agents Catalog
     <p class="hero-subtitle">A comprehensive catalog of specialized AI agents for software development, design, marketing, and more.</p>
 
     <div class="search-container">
-      <input type="text" id="search-input" class="search-input" placeholder="Search agents by name or description...">
-      <span class="search-icon">🔍</span>
+      <label for="search-input" class="visually-hidden">Search agents by name or description</label>
+      <input type="text" id="search-input" class="search-input" placeholder="Search agents by name or description..." aria-describedby="search-hint">
+      <span class="search-icon" aria-hidden="true">🔍</span>
+      <span id="search-hint" class="visually-hidden">Type to filter agents by name or description</span>
     </div>
 
-    <div class="category-filters">
-      <button class="filter-btn active" data-category="all">All</button>
+    <div class="category-filters" role="group" aria-label="Filter agents by category">
+      <button class="filter-btn active" data-category="all" aria-pressed="true">All</button>
       {% for category in site.data.categories %}
-      <button class="filter-btn" data-category="{{ category.id }}">{{ category.name_en }}</button>
+      <button class="filter-btn" data-category="{{ category.id }}" aria-pressed="false">{{ category.name_en }}</button>
       {% endfor %}
     </div>
   </div>
 </div>
 
 <div class="container">
-  <div class="agents-grid" id="agents-grid">
+  <div class="agents-grid" id="agents-grid" role="list" aria-label="Agent listings">
     {% for agent in site.data.agents %}
-    <a href="{{ agent.url }}" class="agent-card" data-category="{{ agent.category }}" data-name="{{ agent.name | downcase | escape }}" data-description="{{ agent.description_en | downcase | replace: '"', '&quot;' }} {{ agent.description_zh | downcase | replace: '"', '&quot;' }}">
+    <a href="{{ agent.url }}" class="agent-card" role="listitem" data-category="{{ agent.category }}" data-name="{{ agent.name | downcase | escape }}" data-description="{{ agent.description_en | downcase | replace: '"', '&quot;' }} {{ agent.description_zh | downcase | replace: '"', '&quot;' }}">
       <div class="card-header" style="background-color: {{ agent.color }}20;">
-        <span class="card-emoji">{{ agent.emoji }}</span>
+        <span class="card-emoji" aria-hidden="true">{{ agent.emoji }}</span>
       </div>
       <div class="card-body">
         <span class="card-category">{{ agent.category_name }}</span>
@@ -39,8 +41,12 @@ title: Agency Agents Catalog
     {% endfor %}
   </div>
 
-  <div class="no-results" id="no-results" style="display: none;">
-    <p>No agents found matching your search.</p>
+  <div class="no-results" id="no-results" style="display: none;" role="status" aria-live="polite">
+    <div class="no-results-content">
+      <span class="no-results-icon" aria-hidden="true">🔍</span>
+      <h3 class="no-results-title">No agents found</h3>
+      <p class="no-results-text">Try adjusting your search or filter to find what you're looking for.</p>
+    </div>
   </div>
 </div>
 

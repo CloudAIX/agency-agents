@@ -21,7 +21,11 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   langButtons.forEach(btn => {
-    btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+    btn.addEventListener('click', () => {
+      setLanguage(btn.dataset.lang);
+      // Update aria-pressed state
+      langButtons.forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === btn.dataset.lang));
+    });
   });
 
   // Restore language preference
@@ -40,7 +44,14 @@ document.addEventListener('DOMContentLoaded', function() {
     currentCategory = savedCategory;
     // Apply the saved category
     filterButtons.forEach(b => {
-      b.classList.toggle('active', b.dataset.category === currentCategory);
+      const isActive = b.dataset.category === currentCategory;
+      b.classList.toggle('active', isActive);
+      b.setAttribute('aria-pressed', isActive);
+    });
+  } else {
+    // Initialize aria-pressed for "All" button
+    filterButtons.forEach(b => {
+      b.setAttribute('aria-pressed', b.dataset.category === 'all');
     });
   }
 
@@ -77,13 +88,16 @@ document.addEventListener('DOMContentLoaded', function() {
   filterButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       currentCategory = btn.dataset.category;
-      
+
       // Update button states
-      filterButtons.forEach(b => b.classList.toggle('active', b === btn));
-      
+      filterButtons.forEach(b => {
+        b.classList.toggle('active', b === btn);
+        b.setAttribute('aria-pressed', b === btn);
+      });
+
       // Save to localStorage
       localStorage.setItem('agent-category', currentCategory);
-      
+
       // Apply filters
       applyFilters();
     });
