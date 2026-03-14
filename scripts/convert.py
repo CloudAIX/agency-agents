@@ -34,7 +34,7 @@ import re
 import sys
 from datetime import date
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 # Resolve this script's own directory so we can import the sibling module.
 _SCRIPT_DIR = Path(__file__).resolve().parent
@@ -358,7 +358,7 @@ def run_conversions(
 # Entry point
 # ---------------------------------------------------------------------------
 
-def main(argv: List[str] | None = None) -> None:
+def main(argv: Optional[List[str]] = None) -> None:
     parser = argparse.ArgumentParser(
         description="Convert agency agent .md files into tool-specific formats.",
     )

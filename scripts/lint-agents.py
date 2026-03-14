@@ -75,7 +75,6 @@ def lint_file(filepath: str) -> Tuple[int, int]:
         return 1, 0
 
     # 2.  Check required frontmatter fields
-    frontmatter_text = "\n".join(frontmatter_lines)
     for field in REQUIRED_FRONTMATTER:
         # Match field at the start of a line
         if not any(line.startswith(f"{field}:") for line in frontmatter_lines):

@@ -34,10 +34,11 @@ Platform support: Windows, macOS, Linux (Python 3.7+, no dependencies).
 from __future__ import annotations
 
 import argparse
-import os
+import re
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
 
@@ -93,17 +94,11 @@ def _box_line() -> str:
 
 def _box_row(text: str) -> str:
     """Content row, right-padded to fit.  *text* may contain ANSI escapes."""
-    import re as _re
-
-    visible = _re.sub(r"\033\[[0-9;]*m", "", text)
+    visible = re.sub(r"\033\[[0-9;]*m", "", text)
     pad = _BOX_INNER - 2 - len(visible)
     if pad < 0:
         pad = 0
     return f"  | {text}{' ' * pad} |"
-
-
-def _box_blank() -> str:
-    return "  |" + " " * _BOX_INNER + "|"
 
 
 # ---------------------------------------------------------------------------
@@ -266,7 +261,6 @@ def interactive_select() -> List[str]:
                 break
             else:
                 print(f"  {YELLOW}Nothing selected -- pick a tool or press q to quit.{RESET}")
-                import time
                 time.sleep(1)
                 total_lines += 1
         else:
@@ -279,7 +273,6 @@ def interactive_select() -> List[str]:
                         toggled = True
             if not toggled:
                 print(f"  {RED}Invalid. Enter a number 1-{n}, or a command.{RESET}")
-                import time
                 time.sleep(1)
                 total_lines += 1
 
@@ -326,22 +319,9 @@ def install_copilot() -> None:
     dest_copilot = HOME / ".copilot" / "agents"
     dest_github.mkdir(parents=True, exist_ok=True)
     dest_copilot.mkdir(parents=True, exist_ok=True)
-    count = 0
-    for dirname in AGENT_DIRS:
-        dirpath = REPO_ROOT / dirname
-        if not dirpath.is_dir():
-            continue
-        for md in sorted(dirpath.rglob("*.md")):
-            try:
-                with open(md, encoding="utf-8") as fh:
-                    first_line = fh.readline().rstrip("\n\r")
-            except (OSError, UnicodeDecodeError):
-                continue
-            if first_line != "---":
-                continue
-            shutil.copy2(str(md), str(dest_github / md.name))
-            shutil.copy2(str(md), str(dest_copilot / md.name))
-            count += 1
+    count = _copy_agent_sources(dest_github)
+    # Copy the same files to the second location
+    _copy_agent_sources(dest_copilot)
     info(f"Copilot: {count} agents -> {dest_github}")
     info(f"Copilot: {count} agents -> {dest_copilot}")
 
@@ -552,11 +532,6 @@ def main(argv: Optional[List[str]] = None) -> None:
     # Preflight
     if not INTEGRATIONS.is_dir():
         error("integrations/ not found. Run 'python scripts/convert.py' first.")
-        sys.exit(1)
-
-    # Validate tool
-    if args.tool != "all" and args.tool not in ALL_TOOLS:
-        error(f"Unknown tool '{args.tool}'. Valid: {' '.join(ALL_TOOLS)}")
         sys.exit(1)
 
     # Decide interactive mode
